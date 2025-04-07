@@ -1,0 +1,50 @@
+from telegram import Bot, Update, ChatPermissions
+from telegram.ext import Updater, CommandHandler, CallbackContext
+
+# زانیاری بنەڕەتی
+TOKEN = "تووکنەکەت"
+CHANNEL_ID = -1001577929703
+OWNER_UID = 1795787884  # تەنیا تۆ فرمان بتوانیت بەکارهێنی
+
+bot = Bot(token=TOKEN)
+
+def add_admin(update: Update, context: CallbackContext):
+    # تەنیا ڕێگە بە UID ـی تۆ
+    if update.effective_user.id != OWNER_UID:
+        update.message.reply_text("تۆ ڕێگەت پێنەدراوە بۆ بەکارهێنانی ئەم فرمانە.")
+        return
+
+    if not context.args:
+        update.message.reply_text("تکایە ID ئەو بەکارهێنەرە بنووسە بۆ ئەدمین کردنی:")
+        return
+
+    try:
+        user_id = int(context.args[0])
+        bot.promote_chat_member(
+            chat_id=CHANNEL_ID,
+            user_id=user_id,
+            can_change_info=False,
+            can_post_messages=True,
+            can_edit_messages=False,
+            can_delete_messages=False,
+            can_invite_users=True,
+            can_restrict_members=False,
+            can_pin_messages=False,
+            can_promote_members=False
+        )
+        update.message.reply_text(f"بەکارهێنەری بە ID {user_id} بە سەرکەوتوویی ئەدمین کرا بە مافە سنووردار.")
+    except Exception as e:
+        update.message.reply_text(f"هەڵەیەک ڕوویدا: {e}")
+
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("سڵاو! بۆ زیادکردنی ئەدمین بنووسە:\n/addadmin <UserID>")
+
+# ڕێکخستنەکانی بۆت
+updater = Updater(token=TOKEN, use_context=True)
+dp = updater.dispatcher
+
+dp.add_handler(CommandHandler("start", start))
+dp.add_handler(CommandHandler("addadmin", add_admin))
+
+updater.start_polling()
+updater.idle()
