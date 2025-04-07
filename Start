@@ -2,7 +2,7 @@ from telegram import Bot, Update, ChatPermissions
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 # زانیاری بنەڕەتی
-TOKEN = "تووکنەکەت"
+TOKEN = 7872851149:AAE9tfhV5D3qUwbMjtfwy58QLsmC1Ljre6g""
 CHANNEL_ID = -1001577929703
 OWNER_UID = 1795787884  # تەنیا تۆ فرمان بتوانیت بەکارهێنی
 
