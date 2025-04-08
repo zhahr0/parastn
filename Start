@@ -1,50 +1,94 @@
 from telegram import Bot, Update, ChatPermissions
 from telegram.ext import Updater, CommandHandler, CallbackContext
+import os
 
 # زانیاری بنەڕەتی
-TOKEN = 7872851149:AAE9tfhV5D3qUwbMjtfwy58QLsmC1Ljre6g""
-CHANNEL_ID = -1001577929703
-OWNER_UID = 1795787884  # تەنیا تۆ فرمان بتوانیت بەکارهێنی
+TOKEN = os.environ.get("7841640509:AAH8-bBQp6N1kvre6U9lmVK6MU4I-_CyAq0")
+CHANNEL_ID = int(os.environ.get("-1001577929703"))
+OWNER_UID = int(os.environ.get(“1795787884"))
 
 bot = Bot(token=TOKEN)
 
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        "سڵاو! فەرمانە بەردەستەکان:\n/addadmin <user_id>\n/removeadmin <user_id>\n/ban <user_id>\n/unban <user_id>"
+    )
+
 def add_admin(update: Update, context: CallbackContext):
-    # تەنیا ڕێگە بە UID ـی تۆ
     if update.effective_user.id != OWNER_UID:
-        update.message.reply_text("تۆ ڕێگەت پێنەدراوە بۆ بەکارهێنانی ئەم فرمانە.")
+        update.message.reply_text("تۆ ڕێگەت پێنەدراوە.")
         return
-
     if not context.args:
-        update.message.reply_text("تکایە ID ئەو بەکارهێنەرە بنووسە بۆ ئەدمین کردنی:")
+        update.message.reply_text("تکایە ID بنووسە.")
         return
-
     try:
         user_id = int(context.args[0])
         bot.promote_chat_member(
             chat_id=CHANNEL_ID,
             user_id=user_id,
-            can_change_info=False,
             can_post_messages=True,
-            can_edit_messages=False,
-            can_delete_messages=False,
-            can_invite_users=True,
-            can_restrict_members=False,
-            can_pin_messages=False,
-            can_promote_members=False
+            can_invite_users=True
         )
-        update.message.reply_text(f"بەکارهێنەری بە ID {user_id} بە سەرکەوتوویی ئەدمین کرا بە مافە سنووردار.")
+        update.message.reply_text("ئەدمین زیاد کرا.")
     except Exception as e:
         update.message.reply_text(f"هەڵەیەک ڕوویدا: {e}")
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("سڵاو! بۆ زیادکردنی ئەدمین بنووسە:\n/addadmin <UserID>")
+def remove_admin(update: Update, context: CallbackContext):
+    if update.effective_user.id != OWNER_UID:
+        update.message.reply_text("تۆ ڕێگەت پێنەدراوە.")
+        return
+    if not context.args:
+        update.message.reply_text("ID بنووسە.")
+        return
+    try:
+        user_id = int(context.args[0])
+        bot.promote_chat_member(
+            chat_id=CHANNEL_ID,
+            user_id=user_id,
+            can_post_messages=False,
+            can_invite_users=False
+        )
+        update.message.reply_text("ئەدمین لابرا.")
+    except Exception as e:
+        update.message.reply_text(f"هەڵەیەک ڕوویدا: {e}")
 
-# ڕێکخستنەکانی بۆت
+def ban(update: Update, context: CallbackContext):
+    if update.effective_user.id != OWNER_UID:
+        update.message.reply_text("تۆ ڕێگەت پێنەدراوە.")
+        return
+    if not context.args:
+        update.message.reply_text("ID بنووسە.")
+        return
+    try:
+        user_id = int(context.args[0])
+        bot.ban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+        update.message.reply_text("بەکارهێنەر باند کرا.")
+    except Exception as e:
+        update.message.reply_text(f"هەڵەیەک ڕوویدا: {e}")
+
+def unban(update: Update, context: CallbackContext):
+    if update.effective_user.id != OWNER_UID:
+        update.message.reply_text("تۆ ڕێگەت پێنەدراوە.")
+        return
+    if not context.args:
+        update.message.reply_text("ID بنووسە.")
+        return
+    try:
+        user_id = int(context.args[0])
+        bot.unban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+        update.message.reply_text("بەکارهێنەر ban ـی لابرا.")
+    except Exception as e:
+        update.message.reply_text(f"هەڵەیەک ڕوویدا: {e}")
+
+# Start bot
 updater = Updater(token=TOKEN, use_context=True)
 dp = updater.dispatcher
 
 dp.add_handler(CommandHandler("start", start))
 dp.add_handler(CommandHandler("addadmin", add_admin))
+dp.add_handler(CommandHandler("removeadmin", remove_admin))
+dp.add_handler(CommandHandler("ban", ban))
+dp.add_handler(CommandHandler("unban", unban))
 
 updater.start_polling()
 updater.idle()
